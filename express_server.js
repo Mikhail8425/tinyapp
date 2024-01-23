@@ -44,9 +44,7 @@ app.get("/hello", (req, res) => {
 
 
 
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
-});
+
 
 const generateRandomString = () => { //generates 6-digit random key 
   const randomString = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -82,4 +80,23 @@ app.get("/u/:id", (req, res) => {
   } else {
     res.status(404).send('Short URL not found');
   }
+});
+
+// DELETE
+// delete an existing quote
+
+app.post('/urls/:id/delete', (req, res) => {
+  // extract the id
+  const urlId = req.params.id;
+  // delete the quote from the database
+
+  delete urlDatabase[urlId];
+
+  // redirect
+  res.redirect('/urls');
+});
+
+
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`);
 });
