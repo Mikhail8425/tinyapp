@@ -81,17 +81,19 @@ app.get("/u/:id", (req, res) => {
 // resubmit with the change
 
 app.get('/urls/:id', (req, res) => {
-  console.log('get after update works')
   const urlId = req.params.id;
+  console.log('urlID', urlId)
   let urlObj = urlDatabase[urlId];
   res.render({ urlObj });
 });
 
 app.post('/urls/:id', (req, res) => {
-  let longURL = req.body.longId;
-  urlDatabase[req.params.id].longURL = longURL;
+  let newLongURL = req.body.longURL;
+  urlDatabase[req.params.id] = newLongURL;
   res.redirect('/urls');
 });
+
+
 
 // DELETE
 // delete an existing quote
