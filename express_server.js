@@ -7,7 +7,6 @@ app.set("view engine", "ejs"); //Set ejs as the view engine.
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com",
-  
 };
 
 app.get("/", (req, res) => {
@@ -45,6 +44,8 @@ app.get("/hello", (req, res) => {
   res.render("hello_world", templateVars);
 });
 
+
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
@@ -67,5 +68,20 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`); //redirect to a page with shortURL
 });
 
-
+// app.get("/u/:shortURL", (req, res) => {
+//   const longURL = urlDatabase.longURL;
+//   res.redirect(longURL);
+// });
 //
+
+app.get("/u/:id", (req, res) => {
+  const shortURL = req.params.id;
+  const longURL = urlDatabase[shortURL];
+
+  if (longURL) {
+    console.log(`Redirecting to ${longURL}`);
+    res.redirect(longURL);
+  } else {
+    res.status(404).send('Short URL not found');
+  }
+});
