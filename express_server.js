@@ -42,10 +42,6 @@ app.get("/hello", (req, res) => {
   res.render("hello_world", templateVars);
 });
 
-
-
-
-
 const generateRandomString = () => { //generates 6-digit random key 
   const randomString = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let result = '';
@@ -64,12 +60,7 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`); //redirect to a page with shortURL
 });
 
-// app.get("/u/:shortURL", (req, res) => {
-//   const longURL = urlDatabase.longURL;
-//   res.redirect(longURL);
-// });
-//
-
+//redirect to longURL
 app.get("/u/:id", (req, res) => {
   const shortURL = req.params.id;
   const longURL = urlDatabase[shortURL];
@@ -80,6 +71,37 @@ app.get("/u/:id", (req, res) => {
   } else {
     res.status(404).send('Short URL not found');
   }
+});
+
+
+
+// UPDATE
+// we want to change an existing quote
+// display the quote that we want to change
+// resubmit with the change
+
+// display the quote
+app.get('/urls/:id', (req, res) => {
+  
+  let longURL = req.body.longId;
+  console.log(urlId)
+  urlDatabase[req.params.id].longURL = longURL;
+  res.redirect('/urls');
+});
+
+app.post('/urls/:id', (req, res) => {
+  // extract the id from the url
+  const urlId = req.params.id;
+
+  // extract the quote from req.body
+  const newUrl = req.body.urlContent;
+
+  // update the moviesQuoteDB and reassign
+  urlDatabase[urlId].longURL = newUrl;
+
+  // redirect to /quote
+
+  res.redirect('/urls');
 });
 
 // DELETE
@@ -97,6 +119,7 @@ app.post('/urls/:id/delete', (req, res) => {
 });
 
 
+//should always be at the end
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
