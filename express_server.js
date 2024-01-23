@@ -6,7 +6,8 @@ app.set("view engine", "ejs"); //Set ejs as the view engine.
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "9sm5xK": "http://www.google.com",
+  
 };
 
 app.get("/", (req, res) => {
@@ -44,20 +45,25 @@ app.get("/hello", (req, res) => {
   res.render("hello_world", templateVars);
 });
 
-app.post("/urls", (req, res) => {
-  console.log(req.body); // Log the POST request body to the console
-  res.send("Ok"); // Respond with 'Ok' (we will replace this)
-});
+
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
 const generateRandomString = () => {
-  const alphaNumerical = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const randomString = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let result = '';
   for (let i = 0; i < 6; i++) {
-    result += alphaNumerical.charAt(Math.floor(Math.random() * alphaNumerical.length));
+    result += randomString.charAt(Math.floor(Math.random() * randomString.length));
   }
   return result;
 };
+
+app.post("/urls", (req, res) => {
+  const newID = generateRandomString();
+  urlDatabase[newID] = req.body.longURL;
+  console.log(urlDatabase)
+  console.log(req.body); // Log the POST request body to the console
+  res.send("Ok"); // Respond with 'Ok' (we will replace this)
+});
