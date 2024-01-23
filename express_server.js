@@ -45,13 +45,11 @@ app.get("/hello", (req, res) => {
   res.render("hello_world", templateVars);
 });
 
-
-
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-const generateRandomString = () => {
+const generateRandomString = () => { //generates 6-digit random key 
   const randomString = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let result = '';
   for (let i = 0; i < 6; i++) {
@@ -61,9 +59,13 @@ const generateRandomString = () => {
 };
 
 app.post("/urls", (req, res) => {
-  const newID = generateRandomString();
-  urlDatabase[newID] = req.body.longURL;
+  const shortURL = generateRandomString(); //call function to generate newID
+  urlDatabase[shortURL] = req.body.longURL; // add key:value to object
   console.log(urlDatabase)
+
   console.log(req.body); // Log the POST request body to the console
-  res.send("Ok"); // Respond with 'Ok' (we will replace this)
+  res.redirect(`/urls/${shortURL}`); //redirect to a page with shortURL
 });
+
+
+//
