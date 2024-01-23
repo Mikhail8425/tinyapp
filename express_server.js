@@ -80,27 +80,16 @@ app.get("/u/:id", (req, res) => {
 // display the quote that we want to change
 // resubmit with the change
 
-// display the quote
 app.get('/urls/:id', (req, res) => {
-  
-  let longURL = req.body.longId;
-  console.log(urlId)
-  urlDatabase[req.params.id].longURL = longURL;
-  res.redirect('/urls');
+  console.log('get after update works')
+  const urlId = req.params.id;
+  let urlObj = urlDatabase[urlId];
+  res.render({ urlObj });
 });
 
 app.post('/urls/:id', (req, res) => {
-  // extract the id from the url
-  const urlId = req.params.id;
-
-  // extract the quote from req.body
-  const newUrl = req.body.urlContent;
-
-  // update the moviesQuoteDB and reassign
-  urlDatabase[urlId].longURL = newUrl;
-
-  // redirect to /quote
-
+  let longURL = req.body.longId;
+  urlDatabase[req.params.id].longURL = longURL;
   res.redirect('/urls');
 });
 
