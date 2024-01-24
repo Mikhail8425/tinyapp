@@ -22,7 +22,10 @@
 
     <% if(username){ %>
       <p>You're logged in as: <%= username %></p>
-    <% } else{ %>  
+      <form action='/logout' method="post">
+        <button type="submit">Logout</button>
+      </form>      
+    <% } else { %>  
       <form method="POST" action="/login">
         <input name="username" type="text" />
         <button type="submit">Login</button>

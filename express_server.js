@@ -77,6 +77,7 @@ app.get("/u/:id", (req, res) => {
 
 
 
+
 // UPDATE
 // we want to change an existing quote
 // display the quote that we want to change
@@ -95,29 +96,27 @@ app.post('/urls/:id', (req, res) => {
   res.redirect('/urls');
 });
 
-
-
 // DELETE
-// delete an existing quote
-
 app.post('/urls/:id/delete', (req, res) => {
-  // extract the id
+  // extract the id of the url to be deleted
   const urlId = req.params.id;
-  // delete the quote from the database
-
+  // delete the url from the database
   delete urlDatabase[urlId];
-
-  // redirect
   res.redirect('/urls');
 });
 
 
 //Login
 app.post('/login', (req, res) => {
-  res.cookie("username", req.body.username);
+  res.cookie('username', req.body.username);
   res.redirect('/urls');
 });
 
+//Logout
+app.post('/logout', (req, res) => {
+  res.clearCookie('username');
+  res.redirect('/urls');
+}); 
 
 
 //should always be at the end
