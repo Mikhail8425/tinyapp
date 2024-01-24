@@ -14,6 +14,15 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com",
 };
 
+//Register
+app.get('/register', (req, res) => {
+  const templateVars = { 
+    urls: urlDatabase,
+    username: req.cookies["username"],
+  };
+  res.render("register", templateVars)
+}); 
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -35,14 +44,14 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
+  const templateVars = { 
+    id: req.params.id, 
+    longURL: urlDatabase[req.params.id],
+    username: req.cookies["username"] 
+  };
   res.render("urls_show", templateVars);
 });
 
-app.get("/hello", (req, res) => {
-  const templateVars = { greeting: "Hello World!" };
-  res.render("hello_world", templateVars);
-});
 
 const generateRandomString = () => { //generates 6-digit random key 
   const randomString = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -64,6 +73,10 @@ app.post("/urls", (req, res) => {
 
 //redirect to longURL
 app.get("/u/:id", (req, res) => {
+  const templateVars = { 
+    urls: urlDatabase,
+    username: req.cookies["username"],
+  };
   const shortURL = req.params.id;
   const longURL = urlDatabase[shortURL];
 
@@ -84,10 +97,14 @@ app.get("/u/:id", (req, res) => {
 // resubmit with the change
 
 app.get('/urls/:id', (req, res) => {
+  const templateVars = { 
+    urls: urlDatabase,
+    username: req.cookies["username"],
+  };
   const urlId = req.params.id;
   console.log('urlID', urlId)
   let urlObj = urlDatabase[urlId];
-  res.render({ urlObj });
+  res.render({ urlObj }, templateVars);
 });
 
 app.post('/urls/:id', (req, res) => {
@@ -117,6 +134,8 @@ app.post('/logout', (req, res) => {
   res.clearCookie('username');
   res.redirect('/urls');
 }); 
+
+
 
 
 //should always be at the end
