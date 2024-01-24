@@ -110,6 +110,13 @@ app.post('/urls/:id/delete', (req, res) => {
 });
 
 
+//Login
+app.post('/login', (req, res) => {
+  console.log("req", req.body.username)
+  res.cookie("username", req.body.username);
+  res.redirect('/urls');
+});
+
 //should always be at the end
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
