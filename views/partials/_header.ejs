@@ -12,15 +12,22 @@
     >
       <span class="navbar-toggler-icon"></span>
     </button>
-    <form method="POST" action="/login">
-      <input name="username" type="text" />
-      <button type="submit">Login</button>
-    </form>  
+
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
     </div>
+
+    <% if(username){ %>
+      <p>You're logged in as: <%= username %></p>
+    <% } else{ %>  
+      <form method="POST" action="/login">
+        <input name="username" type="text" />
+        <button type="submit">Login</button>
+      </form>  
+    <% } %>
+
   </nav>
 </header>
