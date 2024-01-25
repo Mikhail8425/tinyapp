@@ -52,14 +52,14 @@ app.post("/register", (req, res) => {
   
   const userEmail = findEmail(email, users);
   if (userObj.email === "" || userObj.password === ""){
-    res.send("400 error ! Bad request");
+    res.send("400 error ! Please enter email and password");
   } else if  (!userEmail) {
     console.log("hello new user");
     users[newUserID] = userObj;
     res.cookie("user_id", newUserID);
     res.redirect("/urls");
   } else {
-    res.send("400 error ! Bad request");
+    res.send("400 error ! There is already a user with this email");
   }
 });
 
@@ -129,9 +129,6 @@ app.get("/u/:id", (req, res) => {
   }
 });
 
-
-
-
 // UPDATE
 // we want to change an existing quote
 // display the quote that we want to change
@@ -175,13 +172,6 @@ app.post('/logout', (req, res) => {
   res.clearCookie('username');
   res.redirect('/urls');
 }); 
-
-app.post('/register', (req, res) => {
-
-  
-  res.redirect('/urls');
-}); 
-
 
 //should always be at the end
 app.listen(PORT, () => {
