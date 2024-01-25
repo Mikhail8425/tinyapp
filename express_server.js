@@ -44,22 +44,23 @@ app.post("/register", (req, res) => {
   const newUserID = generateRandomString();
   const email = req.body.email
   const password = req.body.password;
-  const userObj = {
+  const newUserObj = {
     id : newUserID,
     email : email,
     password : password
   }; 
   
   const userEmail = findEmail(email, users);
-  if (userObj.email === "" || userObj.password === ""){
+  if (newUserObj.email === "" || newUserObj.password === ""){
     res.send("400 error ! Please enter email and password");
-  } else if  (!userEmail) {
-    console.log("hello new user");
-    users[newUserID] = userObj;
-    res.cookie("user_id", newUserID);
-    res.redirect("/urls");
-  } else {
+  } 
+  if (userEmail) {
     res.send("400 error ! There is already a user with this email");
+  } else { 
+    console.log("hello new user");
+    users[newUserID] = newUserObj;
+    res.cookie("user_id", newUserID);
+    res.redirect("/urls");    
   }
 });
 
@@ -120,6 +121,7 @@ app.get("/u/:id", (req, res) => {
   };
   const shortURL = req.params.id;
   const longURL = urlDatabase[shortURL];
+  
 
   if (longURL) {
     console.log(`Redirecting to ${longURL}`);
@@ -162,6 +164,15 @@ app.post('/urls/:id/delete', (req, res) => {
 
 
 //Login
+app.get("/login", (req, res) => {
+  const templateVars = { 
+    id: req.params.id, 
+    longURL: urlDatabase[req.params.id],
+    username: req.cookies["username"] 
+  };
+  res.render("login", templateVars);
+});
+
 app.post('/login', (req, res) => {
   res.cookie('username', req.body.username);
   res.redirect('/urls');
