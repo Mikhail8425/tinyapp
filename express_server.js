@@ -4,7 +4,7 @@ const express = require("express");
 const app = express();
 const cookieParser = require('cookie-parser')
 const PORT = 8080; // default port 8080
-const { findEmail, findPassword, findUserID } = require('./helpers/helperFunctions')
+const { findEmail, findPassword, findUserID, findUser } = require('./helpers/helperFunctions')
 app.set("view engine", "ejs"); //Set ejs as the view engine.
 app.use(cookieParser())
 app.use(express.urlencoded({ extended: true }));
@@ -58,7 +58,9 @@ app.post("/register", (req, res) => {
     res.send("400 error ! There is already a user with this email");
   } else { 
     console.log("hello new user");
+    
     users[newUserID] = newUserObj;
+    console.log("userEmail", newUserObj.email);
     res.cookie("user_id", newUserID);
     res.redirect("/urls");    
   }
@@ -67,7 +69,7 @@ app.post("/register", (req, res) => {
 app.get('/register', (req, res) => {
   const templateVars = { 
     urls: urlDatabase,
-    username: req.cookies["username"],
+    username: req.cookies["user_id"],
   };
   res.render("register", templateVars)
 }); 
@@ -85,6 +87,7 @@ app.get("/urls", (req, res) => {
     urls: urlDatabase,
     username: req.cookies["user_id"],
   };
+  console.log("templeVars", templateVars)
   res.render("urls_index", templateVars);
 });
 
@@ -139,7 +142,7 @@ app.get("/u/:id", (req, res) => {
 app.get('/urls/:id', (req, res) => {
   const templateVars = { 
     urls: urlDatabase,
-    username: req.cookies["username"],
+    username: req.cookies["user_id"],
   };
   const urlId = req.params.id;
   console.log('urlID', urlId)
@@ -169,8 +172,10 @@ app.get("/login", (req, res) => {
   const templateVars = { 
     id: req.params.id, 
     longURL: urlDatabase[req.params.id],
-    username: req.cookies["username"] 
+    username: req.cookies["user_id"] 
   };
+  console.log("url => login page")
+  console.log(templateVars)
   res.render("login", templateVars);
 });
 
@@ -185,8 +190,10 @@ app.post('/login', (req, res) => {
   console.log('existingUser email, password', existingUserEmail, existingUserPassword);
   if (email === existingUserEmail && password === existingUserPassword) {
     const existingUserID = findUserID(email, users);
+    const existingUser = findUser(email, users)
     console.log('existingUserID', existingUserID)
-    res.cookie('user_id', existingUserID);
+  
+    res.cookie('user_id', existingUserID, existingUser, templateVars);
     res.redirect('/urls');
   } else {
     res.status(403).send('User does not exist. Please go to register page!');

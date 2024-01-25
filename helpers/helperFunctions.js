@@ -28,4 +28,15 @@ const findUserID = (email, users) => {
   return undefined;
 };
 
-module.exports = { findEmail, findPassword, findUserID }
+const findUser = (email, users) => {
+  for (let key in users) {
+    if (email === users[key].email) {
+      console.log(users[key]);
+      return users[key] //should return obj user
+    }
+  }
+  return undefined;
+};
+
+
+module.exports = { findEmail, findPassword, findUserID, findUser }
