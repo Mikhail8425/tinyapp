@@ -3,7 +3,7 @@
 const findEmail = (email, users) => {
   for (let key in users) {
     if (email === users[key].email) {
-      return email;
+      return email; //should return obj user
     }
   }
   return undefined;

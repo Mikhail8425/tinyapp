@@ -4,7 +4,7 @@ const express = require("express");
 const app = express();
 const cookieParser = require('cookie-parser')
 const PORT = 8080; // default port 8080
-const { findEmail } = require('./helpers/helperFunctions')
+const { findEmail, findPassword, findUserID } = require('./helpers/helperFunctions')
 app.set("view engine", "ejs"); //Set ejs as the view engine.
 app.use(cookieParser())
 app.use(express.urlencoded({ extended: true }));
@@ -83,7 +83,7 @@ app.get("/urls.json", (req, res) => {
 app.get("/urls", (req, res) => {
   const templateVars = { 
     urls: urlDatabase,
-    username: req.cookies["username"],
+    username: req.cookies["user_id"],
   };
   res.render("urls_index", templateVars);
 });
@@ -96,7 +96,7 @@ app.get("/urls/:id", (req, res) => {
   const templateVars = { 
     id: req.params.id, 
     longURL: urlDatabase[req.params.id],
-    username: req.cookies["username"] 
+    username: req.cookies["user_id"] 
   };
   res.render("urls_show", templateVars);
 });
@@ -117,7 +117,7 @@ app.post("/urls", (req, res) => {
 app.get("/u/:id", (req, res) => {
   const templateVars = { 
     urls: urlDatabase,
-    username: req.cookies["username"],
+    username: req.cookies["user_id"],
   };
   const shortURL = req.params.id;
   const longURL = urlDatabase[shortURL];
@@ -164,6 +164,7 @@ app.post('/urls/:id/delete', (req, res) => {
 
 
 //Login
+//executed when click "login" from /url page
 app.get("/login", (req, res) => {
   const templateVars = { 
     id: req.params.id, 
@@ -173,15 +174,29 @@ app.get("/login", (req, res) => {
   res.render("login", templateVars);
 });
 
+//executed when click "login" from /login page
 app.post('/login', (req, res) => {
-  res.cookie('username', req.body.username);
-  res.redirect('/urls');
+
+  const email = req.body.email;
+  const password = req.body.password;
+  console.log('email, password', email, password);
+  const existingUserEmail = findEmail(email, users);
+  const existingUserPassword = findPassword(email, users);
+  console.log('existingUser email, password', existingUserEmail, existingUserPassword);
+  if (email === existingUserEmail && password === existingUserPassword) {
+    const existingUserID = findUserID(email, users);
+    console.log('existingUserID', existingUserID)
+    res.cookie('user_id', existingUserID);
+    res.redirect('/urls');
+  } else {
+    res.status(403).send('User does not exist. Please go to register page!');
+  }  
 });
 
 //Logout
 app.post('/logout', (req, res) => {
-  res.clearCookie('username');
-  res.redirect('/urls');
+  res.clearCookie('user_id');
+  res.redirect('/login');
 }); 
 
 //should always be at the end
