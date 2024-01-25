@@ -4,17 +4,65 @@ const express = require("express");
 const app = express();
 const cookieParser = require('cookie-parser')
 const PORT = 8080; // default port 8080
-
+const { findEmail } = require('./helpers/helperFunctions')
 app.set("view engine", "ejs"); //Set ejs as the view engine.
 app.use(cookieParser())
 app.use(express.urlencoded({ extended: true }));
+
+
+
+//HELPER FUNCTIONS
+const generateRandomString = () => { //generates 6-digit random key 
+  return Math.random().toString(36).substring(2,8);
+};
+
+//OBJECTS
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com",
 };
 
+const users = {
+  userRandomID: {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur",
+  },
+  user2RandomID: {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk",
+  },
+};
+
+//SEREVER
+
 //Register
+
+app.post("/register", (req, res) => {
+  const newUserID = generateRandomString();
+  const email = req.body.email
+  const password = req.body.password;
+  const userObj = {
+    id : newUserID,
+    email : email,
+    password : password
+  }; 
+  
+  const userEmail = findEmail(email, users);
+  if (userObj.email === "" || userObj.password === ""){
+    res.send("400 error ! Bad request");
+  } else if  (!userEmail) {
+    console.log("hello new user");
+    users[newUserID] = userObj;
+    res.cookie("user_id", newUserID);
+    res.redirect("/urls");
+  } else {
+    res.send("400 error ! Bad request");
+  }
+});
+
 app.get('/register', (req, res) => {
   const templateVars = { 
     urls: urlDatabase,
@@ -53,14 +101,7 @@ app.get("/urls/:id", (req, res) => {
 });
 
 
-const generateRandomString = () => { //generates 6-digit random key 
-  const randomString = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  let result = '';
-  for (let i = 0; i < 6; i++) {
-    result += randomString.charAt(Math.floor(Math.random() * randomString.length));
-  }
-  return result;
-};
+
 
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString(); //call function to generate newID
@@ -135,10 +176,16 @@ app.post('/logout', (req, res) => {
   res.redirect('/urls');
 }); 
 
+app.post('/register', (req, res) => {
 
+  
+  res.redirect('/urls');
+}); 
 
 
 //should always be at the end
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+
