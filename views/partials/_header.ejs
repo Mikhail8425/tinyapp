@@ -12,7 +12,6 @@
     >
       <span class="navbar-toggler-icon"></span>
     </button>
-
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
@@ -20,24 +19,16 @@
       </div>
     </div>
 
-    <% if(!username){ %>
-      <form action='/login' method="get">
-        <button type="submit">Login</button>
+    <% if (user) { %>
+      <h3 class="navbar-brand">Logged in as: <%= user.email %></h2>
+      <form method="POST" action="/logout">
+        <button class="btn btn-primary" type="submit" value="Submit">Log Out</button>
       </form>
-  
-      <form action='/register' method="get">
-        <button type="submit">Register</button>
-      </form>     
-    <% } %> 
-    
-
-    <% if(username){ %>
-      <p>You're logged in as: <%= username %></p>
-      <form action='/logout' method="post">
-        <button type="submit">Logout</button>
-      </form>      
     <% } %>  
-      
+    <% if (!user) { %>
+      <a class="nav-item nav-link" href="login">Log in</a>
+      <a class="nav-item nav-link" href="register">Sign up</a>
+    <% } %>  
 
   </nav>
 </header>
