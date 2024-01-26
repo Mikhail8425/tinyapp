@@ -1,22 +1,31 @@
+// Mdules
 const express = require("express");
 const app = express();
 const PORT = 8080;
 const bcrypt = require("bcryptjs");
-const cookieSession = require("cookie-session");
-//data and functions
-const { users, urlDatabase } = require("./data");
-const { getUserByEmail, generateRandomString, setLongUrl } = require("./helpers/helpers")({ users });
 
 app.use(express.static("public"));
+
+//Objects
+const { users, urlDatabase } = require("./data");
+
+// Import helper functions from external file
+const { getUserByEmail, generateRandomString, setLongUrl } = require("./helpers/helpers")({ users });
+
+// Configure cookie session
+const cookieSession = require("cookie-session");
 app.use(
   cookieSession({
     name: "session",
-    keys: ["235fgs", "sef25", "test", "app", "hello"],
+    keys: ["alpha135", "beta246", "gamma357", "delta468", "epsilon579"],
   })
 );
-app.use(express.urlencoded({ extended: true }));
-app.set("view engine", "ejs");
 
+// Configure view engine
+app.set("view engine", "ejs");
+app.use(express.urlencoded({ extended: true }));
+
+// Define routes
 app.get("/urls.json", (req, res) => {
   res.json(users);
 });
@@ -153,7 +162,7 @@ app.post("/urls/:id", (req, res) => {
 });
 
 // Login user
-//login page, enter email/password, 
+
 app.post("/login", (req, res) => {
   // Extract the email and password from the request body
   const { email, password } = req.body;
@@ -166,7 +175,7 @@ app.post("/login", (req, res) => {
     res.redirect("/urls");
   } else {
     // Otherwise, send a 401 Unauthorized response
-    res.status(401).send("Username or Password Incorrect");
+    res.status(401).send("Bad credentials");
   }
 });
 
@@ -220,7 +229,39 @@ app.post("/register", (req, res) => {
   res.redirect("/urls");
 });
 
+//////  LOGIN  //////
 
+// This route handles displaying the login page
+app.get("/login", (req, res) => {
+  // Create an object with user information
+  let templateVars = { user: users[req.session["user_id"]] };
+
+  // Check if there is already a user logged in, if so, redirect to main page
+  if (templateVars.user) {
+    res.redirect("/urls");
+  } else {
+    // Render the login page and pass in the user object
+    res.render("urls_login", templateVars);
+  }
+});
+
+// This route handles processing the login form submission
+app.post("/login", (req, res) => {
+  // Extract the email and password from the form submission
+  const { email, password } = req.body;
+
+  // Find the user based on their email
+  const user = getUserByEmail(email, users);
+
+  // If the user is found and the password matches, set the user_id session cookie and redirect to main page
+  if (bcrypt.compareSync(password, user.password)) {
+    req.session.user_id = user.id;
+    res.redirect("/urls");
+  } else {
+    // If the email or password is incorrect, return a 401 error
+    res.status(401).send("Bad credentials");
+  }
+});
 
 // Start listening on the specified port
 app.listen(PORT, () => {
