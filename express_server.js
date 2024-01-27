@@ -43,7 +43,7 @@ app.get("/urls", (req, res) => {
   const userID = req.session.user_id;
   if (!userID) {
     // Message when user is not logged in
-    res.status(401).send("Login required");
+    res.status(401).send("You're not logged in. Please go to login page.");
   } else {
     // Filter urlDatabase to only show URLs created by the current user
     const userUrls = {};
@@ -66,7 +66,7 @@ app.get("/urls/new", (req, res) => {
   const userID = req.session["user_id"];
   if (!userID) {
     // Redirect to login page if user is not logged in
-    res.status(401).send("Login");
+    res.status(401).send("You're not logged in. Please go to login page.");
   } else {
     // Render new URL form with user data
     let templateVars = {
@@ -81,7 +81,7 @@ app.post("/urls", (req, res) => {
   const userID = req.session.user_id;
   if (!userID) {
     // Return 401 Unauthorized status if user is not logged in
-    res.status(401).send("Unauthorized");
+    res.status(401).send("You're not logged in. Please go to login page.");
   } else {
     // Generate random short URL ID and add new URL to database
     let id = generateRandomString();

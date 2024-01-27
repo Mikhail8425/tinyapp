@@ -23,9 +23,7 @@ module.exports = () => {
     }
   };
 
-  // A function that generates a random 6-character string from a set of
-  // upper and lower case letters and digits, and returns it.
-  
+  //Generate random string, 6 character  
   const generateRandomString = function () {
     return Math.random().toString(36).substring(2,8);
   };
