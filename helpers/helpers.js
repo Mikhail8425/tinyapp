@@ -5,7 +5,7 @@ module.exports = () => {
   const getUserByEmail = function(email, users) {
     // Check if user exists? => look for that email
     for (let userId in users) {
-      if (users[userId].email === email) {
+      if (users[userId].email === email && users[userId].email != undefined ) {
         return users[userId];
       }
     }
