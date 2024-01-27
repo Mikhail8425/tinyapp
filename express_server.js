@@ -12,7 +12,7 @@ const { users, urlDatabase } = require("./data");
 // Import helper functions from external file
 const { getUserByEmail, generateRandomString, setLongUrl } = require("./helpers")({ users });
 
-// Configure cookie session
+// Cookie session
 const cookieSession = require("cookie-session");
 app.use(
   cookieSession({
@@ -42,7 +42,7 @@ app.get("/", (req, res) => {
 app.get("/urls", (req, res) => {
   const userID = req.session.user_id;
   if (!userID) {
-    // Message when user is not logged in
+    // Error when user is not logged in
     res.status(401).send("You're not logged in. Please go to login page.");
   } else {
     // Filter urlDatabase to only show URLs created by the current user
@@ -63,10 +63,10 @@ app.get("/urls", (req, res) => {
 
 // Display form for creating a new URL
 app.get("/urls/new", (req, res) => {
-  const userID = req.session["user_id"];
+  const userID = req.session.user_id;
   if (!userID) {
-    // Redirect to login page if user is not logged in
-    res.status(401).send("You're not logged in. Please go to login page.");
+    //rerdirect if there is no user
+    res.redirect("/login");
   } else {
     // Render new URL form with user data
     let templateVars = {
@@ -80,7 +80,7 @@ app.get("/urls/new", (req, res) => {
 app.post("/urls", (req, res) => {
   const userID = req.session.user_id;
   if (!userID) {
-    // Return 401 Unauthorized status if user is not logged in
+    // Error when user is not logged in
     res.status(401).send("You're not logged in. Please go to login page.");
   } else {
     // Generate random short URL ID and add new URL to database
@@ -97,7 +97,7 @@ app.post("/urls", (req, res) => {
 // Delete a short URL
 app.post("/urls/:id/delete", (req, res) => {
   if (!req.session.user_id) {
-    // If not logged in, redirect to login page or show an error message
+    // Error when user is not logged in
     res.status(401).send("You need to log in to delete a URL");
     return;
   }
@@ -129,7 +129,7 @@ app.get("/urls/:id", (req, res) => {
   const id = req.params.id;
 
   if (!userID) {
-    // If user is not logged in, redirect to login page
+    // Error when user is not logged in
     res.status(401).send("Login required");
   } else if (!urlDatabase[id]) {
     // If the ID does not exist in the database, send an error message
@@ -137,7 +137,7 @@ app.get("/urls/:id", (req, res) => {
   } else {
     // If user is logged in and the ID exists, render the urls_show template with the provided URL data
     const templateVars = {
-      user: users[req.session["user_id"]],
+      user: users.req.session.user_id,
       id: id,
       longURL: urlDatabase[id],
     };
@@ -146,7 +146,7 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.post("/urls/:id", (req, res) => {
-  // Check if the user is logged in
+  // Error when user is not logged in
   if (!req.session.user_id) {
     res.status(401).send("Unauthorized");
     return;
@@ -185,11 +185,11 @@ app.post("/logout", (req, res) => {
   res.redirect("/login");
 });
 
-//////  REGISTER USER //////
+//REGISTER USER
 
 app.get("/register", (req, res) => {
   // Render the urls_register template with the user data
-  let templateVars = { user: users[req.session["user_id"]] };
+  let templateVars = { user: users[req.session["user_id"]]};
   res.render("urls_register", templateVars);
 });
 
@@ -223,13 +223,13 @@ app.post("/register", (req, res) => {
     res.redirect("/urls");
   } else {
     // If email and/or password are missing, send a 400 Bad Request response
-    res.status(400).send("Must enter in credentials");
+    res.status(400).send("Please enter email and password");
   }
   console.log(users);
   res.redirect("/urls");
 });
 
-//////  LOGIN  //////
+//LOGIN
 
 // This route handles displaying the login page
 app.get("/login", (req, res) => {
