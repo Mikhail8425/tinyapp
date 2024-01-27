@@ -10,7 +10,7 @@ app.use(express.static("public"));
 const { users, urlDatabase } = require("./data");
 
 // Import helper functions from external file
-const { getUserByEmail, generateRandomString, setLongUrl } = require("./helpers/helpers")({ users });
+const { getUserByEmail, generateRandomString, setLongUrl } = require("./helpers")({ users });
 
 // Configure cookie session
 const cookieSession = require("cookie-session");
@@ -175,7 +175,7 @@ app.post("/login", (req, res) => {
     res.redirect("/urls");
   } else {
     // Otherwise, send a 401 Unauthorized response
-    res.status(401).send("Bad credentials");
+    res.status(401).send("User or password are not correct");
   }
 });
 
@@ -259,7 +259,7 @@ app.post("/login", (req, res) => {
     res.redirect("/urls");
   } else {
     // If the email or password is incorrect, return a 401 error
-    res.status(401).send("Bad credentials");
+    res.status(401).send("User or password are not correct");
   }
 });
 
