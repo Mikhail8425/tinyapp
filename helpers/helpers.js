@@ -9,7 +9,7 @@ module.exports = () => {
         return users[userId];
       }
     }
-    return undefined;
+    return null;
   };
 
   // A function that takes a URL, checks if it starts with http:// or https://,
