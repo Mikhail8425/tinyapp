@@ -2,16 +2,15 @@ module.exports = () => {
   // A function that takes an email and a users object, loops through the object
   // to find a user with a matching email, and returns the user object.
 
-  const getUserByEmail = function(email, users) {
-    // Check if user exists? => look for that email
-    for (let userId in users) {
-      if (users[userId].email === email && users[userId].email != undefined ) {
-        return users[userId];
+  //check to see if email exist
+  const findEmail = (email, db) => {
+    for (let key in db) {
+      if (email === db[key].email) {
+        return email;
       }
     }
-    return null;
+    return undefined;
   };
-
   // A function that takes a URL, checks if it starts with http:// or https://,
   // and returns the URL as-is if it does, or prepends 'http://' otherwise.
   
@@ -29,5 +28,5 @@ module.exports = () => {
   };
 
   // Export an object that contains the three functions.
-  return { getUserByEmail, generateRandomString, setLongUrl };
+  return { findEmail, generateRandomString, setLongUrl };
 };
