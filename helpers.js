@@ -36,3 +36,13 @@ module.exports = () => {
   // Export an object that contains the four functions.
   return { findEmail, generateRandomString, setLongUrl, getUserByEmail };   
 };
+
+const getUserByEmail = (email, db) => {
+  for (let key in db) {
+    if (db[key].email === email) {
+      return db[key];
+    }
+  }
+  return undefined;
+};
+module.exports = {getUserByEmail}

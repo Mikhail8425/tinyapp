@@ -1,6 +1,6 @@
 const { assert } = require('chai');
 
-const { getUserByEmail } = require('../helpers');
+const { findEmail, generateRandomString, setLongUrl, getUserByEmail } = require("../helpers");
 
 const testUsers = {
   "userRandomID": {
