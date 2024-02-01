@@ -1,8 +1,5 @@
 module.exports = () => {
-  // A function that takes an email and a users object, loops through the object
-  // to find a user with a matching email, and returns the user object.
-
-  //check to see if email exist
+  //check to see if email exist in database
   const findEmail = (email, db) => {
     for (let key in db) {
       if (email === db[key].email) {
@@ -11,10 +8,9 @@ module.exports = () => {
     }
     return undefined;
   };
-  // A function that takes a URL, checks if it starts with http:// or https://,
-  // and returns the URL as-is if it does, or prepends 'http://' otherwise.
   
-  const setLongUrl = function(url) {
+  // A function prepends 'http://' if there is no 'http://' or 'https://'
+    const setLongUrl = function(url) {
     if (url.match(/^(https:\/\/|http:\/\/)/)) {
       return url;
     } else {
@@ -27,6 +23,16 @@ module.exports = () => {
     return Math.random().toString(36).substring(2,8);
   };
 
-  // Export an object that contains the three functions.
-  return { findEmail, generateRandomString, setLongUrl };
+  //Return user obj based on email key
+  const getUserByEmail = (email, db) => {
+    for (let key in db) {
+      if (db[key].email === email) {
+        return db[key];
+      }
+    }
+    return undefined;
+  };
+
+  // Export an object that contains the four functions.
+  return { findEmail, generateRandomString, setLongUrl, getUserByEmail };   
 };

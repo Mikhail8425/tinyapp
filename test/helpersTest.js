@@ -1,3 +1,7 @@
+const { assert } = require('chai');
+
+const { getUserByEmail } = require('../helpers');
+
 const testUsers = {
   "userRandomID": {
     id: "userRandomID", 
@@ -11,27 +15,16 @@ const testUsers = {
   }
 };
 
-const chai = require("chai");
-const chaiHttp = require("chai-http");
-const expect = chai.expect;
+describe('getUserByEmail', function() {
+  it('should return a user with valid email', function() {
+    const user = getUserByEmail("user@example.com", testUsers);
+    const expectedOutput = "userRandomID";
+    assert.equal(user.id,expectedOutput);
+  });
 
-chai.use(chaiHttp);
-
-describe("Login and Access Control Test", () => {
-  it('should return 403 status code for unauthorized access to "http://localhost:8080/urls/b2xVn2"', () => {
-    const agent = chai.request.agent("http://localhost:8080");
-
-    // Step 1: Login with valid credentials
-    return agent
-      .post("/login")
-      .send({ email: "user2@example.com", password: "dishwasher-funk" })
-      .then((loginRes) => {
-        // Step 2: Make a GET request to a protected resource
-        return agent.get("/urls/b2xVn2").then((accessRes) => {
-          // Step 3: Expect the status code to be 403
-          expect(accessRes).to.have.status(403);
-        });
-      });
+  it('should return undefined if the email is not valid', function() {
+    const user = getUserByEmail("user3@example.com", testUsers);
+    const expectedOutput = undefined;
+    assert.equal(user,expectedOutput);
   });
 });
-
