@@ -55,7 +55,7 @@ app.get("/urls.json", (req, res) => {
 
 // Homepage redirects to urls or login
 app.get("/", (req, res) => {
-  if (req.session.user_id) {
+  if (req.session.userID) {
     res.redirect("/urls");
   } else {
     res.redirect("/login");
@@ -68,7 +68,7 @@ app.get("/", (req, res) => {
 app.get("/login", (req, res) => {
   // Create an object with user information
   let templateVars = { 
-    user: users[req.session["user_id"]]
+    user: users[req.session["userID"]]
   };  
   // Check if there is already a user logged in, if so, redirect to main page
   if (templateVars.user) {
@@ -85,14 +85,14 @@ app.get("/login", (req, res) => {
 app.get("/register", (req, res) => {
   // Render the urls_register template with the user data
   let templateVars = { 
-    user: users[req.session["user_id"]]
+    user: users[req.session["userID"]]
   };
   res.render("urls_register", templateVars);
 });
 
 //MAIN PAGE
 app.get("/urls", (req, res) => {
-  const userID = req.session.user_id;
+  const userID = req.session.userID;
   if (!userID) {
     // Error when user is not logged in
     res.status(401).send("You're not logged in. Please go to login page.");
@@ -115,7 +115,7 @@ app.get("/urls", (req, res) => {
 
 // Display form for creating a new URL
 app.get("/urls/new", (req, res) => {
-  const userID = req.session.user_id;
+  const userID = req.session.userID;
   if (!userID) {
     //rerdirect if there is no user
     res.redirect("/login");
@@ -130,7 +130,7 @@ app.get("/urls/new", (req, res) => {
 
 // Create a new short URL
 app.post("/urls", (req, res) => {
-  const userID = req.session.user_id;
+  const userID = req.session.userID;
   if (!userID) {
     // Error when user is not logged in
     res.status(401).send("You're not logged in. Please go to login page.");
@@ -148,7 +148,7 @@ app.post("/urls", (req, res) => {
 
 // Delete a short URL
 app.post("/urls/:id/delete", (req, res) => {
-  if (!req.session.user_id) {
+  if (!req.session.userID) {
     // Error when user is not logged in
     res.status(401).send("You need to log in to delete a URL");
     return;
@@ -159,7 +159,7 @@ app.post("/urls/:id/delete", (req, res) => {
     return;
   }
 
-  if (url.userID !== req.session.user_id) {
+  if (url.userID !== req.session.userID) {
     res.status(403).send("You are not authorized to delete this URL");
     return;
   }
@@ -194,27 +194,6 @@ app.get("/urls/:shortURL", (req, res) => {
   }
 });
 
-// app.get("/urls/:id", (req, res) => {
-//   const userID = req.session.user_id;
-//   const id = req.params.id;
-
-//   if (!userID) {
-//     // Error when user is not logged in
-//     res.status(401).send("Login required");
-//   } else if (!urlDatabase[id]) {
-//     // If the ID does not exist in the database, send an error message
-//     res.status(404).send("URL not found");
-//   } else {
-//     // If user is logged in and the ID exists, render the urls_show template with the provided URL data
-//     const templateVars = {
-//       user: users.req.session.user_id,
-//       id: id,
-//       longURL: urlDatabase[id],
-//     };
-//     res.render("urls_show", templateVars);
-//   }
-// });
-
 //POST
 app.post("/urls/:id", (req, res) => {
   if (urlDatabase[req.params.id].userID === req.session["userID"]) {
@@ -225,21 +204,6 @@ app.post("/urls/:id", (req, res) => {
     res.status(403).send("Not permitted");
   }
 });
-// app.post("/urls/:id", (req, res) => {
-//   // Error when user is not logged in
-//   if (!req.session.user_id) {
-//     res.status(401).send("Unauthorized");
-//     return;
-//   }
-//   const id = req.params.id;
-//   const longURL = req.body.longURL;
-//   if (!urlDatabase[id] || urlDatabase[id].userID !== req.session.user_id) {
-//     res.status(403).send("Forbidden");
-//     return;
-//   }
-//   urlDatabase[id].longURL = longURL;
-//   res.redirect("/urls");
-// });
 
 // Login user
 
@@ -250,8 +214,8 @@ app.post("/login", (req, res) => {
   const user = findEmail(email, users);
   // Check if the provided password matches the password associated with the email
   if (user && bcrypt.compareSync(password, user.password)) {
-    // Set the user_id cookie and redirect to the urls page
-    req.session.user_id = user.id;
+    // Set the userID cookie and redirect to the urls page
+    req.session.userID = user.id;
     res.redirect("/urls");
   } else {
     // Otherwise, send a 401 Unauthorized response
@@ -260,7 +224,7 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-  // Clear the user_id cookie and redirect to the login page
+  // Clear the userID cookie and redirect to the login page
   req.session = null;
   res.redirect("/login");
 });
@@ -288,8 +252,8 @@ app.post("/register", (req, res) => {
   };
 
   if (email && password) {
-    // Set the user_id cookie and redirect to the urls page
-    req.session.user_id = newUserID;
+    // Set the userID cookie and redirect to the urls page
+    req.session.userID = newUserID;
     res.redirect("/urls");
   } else {
     // If email and/or password are missing, send a 400 Bad Request response
@@ -306,9 +270,9 @@ app.post("/login", (req, res) => {
 
   // Find the user based on their email
   const user = findEmail(email, users);
-  // If the user is found and the password matches, set the user_id session cookie and redirect to main page
+  // If the user is found and the password matches, set the userID session cookie and redirect to main page
   if (bcrypt.compareSync(password, user.password)) {
-    req.session.user_id = user.id;
+    req.session.userID = user.id;
     res.redirect("/urls");
   } else {
     // If the email or password is incorrect, return a 401 error
