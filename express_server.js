@@ -29,7 +29,7 @@ app.use(express.static("public"));
 
 
 // Import helper functions from external file
-const { findEmail, generateRandomString, setLongUrl } = require("./helpers")({ users });
+const { findEmail, generateRandomString, setLongUrl } = require("./helpers");
 
 //body parser
 const bodyParser = require("body-parser");
@@ -128,22 +128,13 @@ app.get("/urls/new", (req, res) => {
   }
 });
 
-// Create a new short URL
+// Create a new short and long URL 
 app.post("/urls", (req, res) => {
-  const userID = req.session.userID;
-  if (!userID) {
-    // Error when user is not logged in
-    res.status(401).send("You're not logged in. Please go to login page.");
-  } else {
-    // Generate random short URL ID and add new URL to database
-    let id = generateRandomString();
-    urlDatabase[id] = {
-      longURL: setLongUrl(req.body.longURL),
-      userID: userID,
-    };
-    // Redirect to new URL page
-    res.redirect(`/urls/${id}`);
-  }
+  const longURL = req.body.longURL;
+  const userID = req.session["userID"];
+  const shortURL = generateRandomString();
+  urlDatabase[shortURL] = { longURL, userID };
+  res.redirect(`/urls/${shortURL}`);
 });
 
 // Delete a short URL
