@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+  <!-- Bootstrap CSS -->
   <head>
     <!-- Bootstrap CSS -->
     <link
@@ -10,25 +11,24 @@
     />
     <title>URL - TinyApp Example</title>
   </head>
-
-
   <body>
-    <header>
-      <header><%- include('partials/_header') %></header>
-    </header>
+    <%- include('partials/_header') %>
     <div class="card text-center">
       <div class="card-header"></div>
-        <div class="card-body">
-          <h5 class="card-title"> Tiny URL for: <a href="<%= longURL.longURL %>"><%= longURL.longURL %></a></h5>
-          <p class="card-text">Short URL: <a href="/u/<%= shortURL %>"><%= shortURL %></a></p>
-        </div>
+      <div class="card-body">
+        <h5 class="card-title">TinyURL for: <%= longURL %></h5>
+        <p class="card-text">
+          Short URL ID: <a href="/u/<%= id %>"><%= id %></a>
+        </p>
       </div>
       <div class="card-footer text-muted">
-        <form action='/urls/<%= shortURL %>' method="POST">
-          <h3>Edit</h3>
-          <label form="name"> New URL : </label>
-          <input type="text" name="longURL" id="longURL" placeholder="<%= longURL %>">
-          <button type="submit">Submit</button>
+        <p>
+          <h5>Edit</h5>
+        </p>
+        <form method="POST" action="/urls/<%- id %>?_method=PUT">
+          New URL: 
+          <input name="longURL" id="<%= id %>" value="<%= longURL %>" size="50"/>
+          <button type="submit" class="btn btn-primary">Submit</button>
         </form>
       </div>
     </div>

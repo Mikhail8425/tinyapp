@@ -62,9 +62,8 @@ app.get("/", (req, res) => {
   }
 });
   
-//LOGIN
+//  LOGIN get/post  //
 
-// Login page
 app.get("/login", (req, res) => {
   // Create an object with user information
   let templateVars = { 
@@ -80,8 +79,30 @@ app.get("/login", (req, res) => {
   }
 });
 
-//REGISTER USER
-  
+app.post("/login", (req, res) => {
+  // Extract the email and password from the request body
+  const { email, password } = req.body;
+  // Check if the user exists in the user database
+  const user = findEmail(email, users);
+  // Check if the provided password matches the password associated with the email
+  if (user && bcrypt.compareSync(password, user.password)) {
+    // Set the userID cookie and redirect to the urls page
+    req.session.userID = user.id;
+    res.redirect("/urls");
+  } else {
+    // Otherwise, send a 401 Unauthorized response
+    res.status(401).send("User or password are not correct");
+  }
+});
+
+// LOGOUT //
+app.post("/logout", (req, res) => {
+  // Clear the userID cookie and redirect to the login page
+  req.session = null;
+  res.redirect("/login");
+});
+
+// REGISTER get/post // 
 app.get("/register", (req, res) => {
   // Render the urls_register template with the user data
   let templateVars = { 
@@ -90,7 +111,39 @@ app.get("/register", (req, res) => {
   res.render("urls_register", templateVars);
 });
 
-//MAIN PAGE
+app.post("/register", (req, res) => {
+  // Extract the email and password from the request body, create new random ID
+  const { email, password } = req.body;
+  const newUserID = generateRandomString();
+  const hashedPassword = bcrypt.hashSync(password, saltRounds);
+
+  // Check if the user already exists
+  for (let newUserID in users) {
+    if (users[newUserID].email === email) {
+      res.status(400).send("User already exist");
+      return;
+    }
+  }
+  // Add the new user to the user database
+  users[newUserID] = {
+    id: newUserID,
+    email: email,
+    password: hashedPassword,
+  };
+
+  if (email && password) {
+    // Set the userID cookie and redirect to the urls page
+    req.session.userID = newUserID;
+    res.redirect("/urls");
+  } else {
+    // If email and/or password are missing, send a 400 Bad Request response
+    res.status(400).send("Please enter email and password");
+  }
+  console.log(users);
+  res.redirect("/urls");
+});
+
+//  URLS get/post  //
 app.get("/urls", (req, res) => {
   const userID = req.session.userID;
   if (!userID) {
@@ -113,6 +166,14 @@ app.get("/urls", (req, res) => {
   }
 });
 
+app.post("/urls", (req, res) => {
+  const longURL = req.body.longURL;
+  const userID = req.session["userID"];
+  const shortURL = generateRandomString();
+  urlDatabase[shortURL] = { longURL, userID };
+  res.redirect(`/urls/${shortURL}`);
+});
+
 // Display form for creating a new URL
 app.get("/urls/new", (req, res) => {
   const userID = req.session.userID;
@@ -128,16 +189,45 @@ app.get("/urls/new", (req, res) => {
   }
 });
 
-// Create a new short and long URL 
-app.post("/urls", (req, res) => {
-  const longURL = req.body.longURL;
-  const userID = req.session["userID"];
-  const shortURL = generateRandomString();
-  urlDatabase[shortURL] = { longURL, userID };
-  res.redirect(`/urls/${shortURL}`);
+// Redirect to long URL associated with a short URL
+app.get("/u/:id", (req, res) => {
+  const longURL = urlDatabase[req.params.id];
+  res.redirect(longURL);
+  console.log(longURL);
 });
 
-// Delete a short URL
+
+
+app.get("/urls/:id", (req, res) => {
+  if (!req.session["userID"]) {
+    console.log('users', users)
+    res.status(400).send("400 error ! Please Login or Register");
+  } else if (!urlDatabase[req.params.shortURL]) {
+    res.status(404).send("404 not found! This URL doesn't exist");
+  } else if (urlDatabase[req.params.shortURL].userID === req.session["userID"]) {
+    const templateVars = {
+      shortURL: req.params.shortURL,
+      longURL: urlDatabase[req.params.shortURL].longURL,
+      user: users[req.session["userID"]]
+    };
+    res.render("urls_show", templateVars);
+  } else if (urlDatabase[req.params.shortURL].userID !== req.session["userID"]) {
+    res.status(403).send("403 error ! This is not your URL");
+  } else {
+    res.status(400).send("400 error ! Please Login");
+  }
+});
+
+app.post("/urls/:id", (req, res) => {
+  if (urlDatabase[req.params.id].userID === req.session["userID"]) {
+    let longURL = req.body.longURL;
+    urlDatabase[req.params.id].longURL = longURL;
+    res.redirect('/urls');
+  } else {
+    res.status(403).send("Not permitted");
+  }
+});
+
 app.post("/urls/:id/delete", (req, res) => {
   if (!req.session.userID) {
     // Error when user is not logged in
@@ -158,117 +248,21 @@ app.post("/urls/:id/delete", (req, res) => {
   res.redirect("/urls");
 });
 
-// Redirect to long URL associated with a short URL
-app.get("/u/:id", (req, res) => {
-  const longURL = urlDatabase[req.params.id];
-  res.redirect(longURL);
-  console.log(longURL);
-});
-
-app.get("/urls/:shortURL", (req, res) => {
-  if (!req.session["userID"]) {
-    console.log('users', users)
-    res.status(400).send("400 error ! Please Login or Register");
-  } else if (!urlDatabase[req.params.shortURL]) {
-    res.status(404).send("404 not found! This URL doesn't exist");
-  } else if (urlDatabase[req.params.shortURL].userID === req.session["userID"]) {
-    const templateVars = {
-      shortURL: req.params.shortURL,
-      longURL: urlDatabase[req.params.shortURL].longURL,
-      user: users[req.session["userID"]]
-    };
-    res.render("urls_show", templateVars);
-  } else if (urlDatabase[req.params.shortURL].userID !== req.session["userID"]) {
-    res.status(403).send("403 error ! This is not your URL");
-  } else {
-    res.status(400).send("400 error ! Please Login");
+app.post("/urls/:id/edit", (req, res) => {
+  const userId = req.session.userId;
+  if (!userId) {
+    res.send("Please login to shorten URLs");
+    return;
   }
-});
-
-//POST
-app.post("/urls/:id", (req, res) => {
-  if (urlDatabase[req.params.id].userID === req.session["userID"]) {
-    let longURL = req.body.longURL;
-    urlDatabase[req.params.id].longURL = longURL;
-    res.redirect('/urls');
-  } else {
-    res.status(403).send("Not permitted");
+  const longURL = req.body.newLongURL;
+  const shortURL = req.params.id;
+  // Check if shortURL exists in urlDatabase
+  if (!urlDatabase[shortURL]) {
+    res.status(404).send("URL not found");
+    return;
   }
-});
-
-// Login user
-
-app.post("/login", (req, res) => {
-  // Extract the email and password from the request body
-  const { email, password } = req.body;
-  // Check if the user exists in the user database
-  const user = findEmail(email, users);
-  // Check if the provided password matches the password associated with the email
-  if (user && bcrypt.compareSync(password, user.password)) {
-    // Set the userID cookie and redirect to the urls page
-    req.session.userID = user.id;
-    res.redirect("/urls");
-  } else {
-    // Otherwise, send a 401 Unauthorized response
-    res.status(401).send("User or password are not correct");
-  }
-});
-
-app.post("/logout", (req, res) => {
-  // Clear the userID cookie and redirect to the login page
-  req.session = null;
-  res.redirect("/login");
-});
-
-
-app.post("/register", (req, res) => {
-  // Extract the email and password from the request body, create new random ID
-  const { email, password } = req.body;
-  const newUserID = generateRandomString();
-  const hashedPassword = bcrypt.hashSync(password, saltRounds);
-
-  // Check if the user already exists
-  for (let newUserID in users) {
-    if (users[newUserID].email === email) {
-      res.status(400).send("User already exist");
-      return;
-    }
-  }
-
-  // Add the new user to the user database
-  users[newUserID] = {
-    id: newUserID,
-    email,
-    password: hashedPassword,
-  };
-
-  if (email && password) {
-    // Set the userID cookie and redirect to the urls page
-    req.session.userID = newUserID;
-    res.redirect("/urls");
-  } else {
-    // If email and/or password are missing, send a 400 Bad Request response
-    res.status(400).send("Please enter email and password");
-  }
-  console.log(users);
+  urlDatabase[shortURL].longURL = longURL;
   res.redirect("/urls");
-});
-
-// This route handles processing the login form submission
-app.post("/login", (req, res) => {
-  // Extract the email and password from the form submission
-  const { email, password } = req.body;
-
-  // Find the user based on their email
-  const user = findEmail(email, users);
-  // If the user is found and the password matches, set the userID session cookie and redirect to main page
-  if (bcrypt.compareSync(password, user.password)) {
-    req.session.userID = user.id;
-    res.redirect("/urls");
-  } else {
-    // If the email or password is incorrect, return a 401 error
-    res.status(401).send("User or password are not correct");
-  }
 });
 
 // Start listening on the specified port
