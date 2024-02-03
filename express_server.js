@@ -11,25 +11,39 @@ const users = {
   userRandomID: {
     id: "userRandomID",
     email: "user@example.com",
-    password: bcrypt.hashSync("2", saltRounds),
+    password: bcrypt.hashSync("123", saltRounds),
   },
   user2RandomID: {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: bcrypt.hashSync("2", saltRounds)
+    password: bcrypt.hashSync("123", saltRounds)
   },
 };
 
 const urlDatabase = {
-  b2xVn2: "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com",
+  "b2xVn2": {
+    longURL: "http://www.lighthouselabs.ca",
+    userID: "user01"
+  },
+  "9sm5xK": {
+    longURL: "http://www.google.com",
+    userID: "user02"
+  }
 };
 
 app.use(express.static("public"));
 
 
 // Import helper functions from external file
-const { findEmail, generateRandomString, setLongUrl } = require("./helpers");
+const { 
+  generateRandomString,
+  getUserByEmail,
+  getUserFromCookie,
+  getUserById,
+  getUrlFromShortUrl,
+  generateNewShortUrl,
+  createNewURL
+} = require("./helpers");
 
 //body parser
 const bodyParser = require("body-parser");
@@ -74,7 +88,7 @@ app.get("/login", (req, res) => {
     res.redirect("/urls");
   } else {
     // Render the login page and pass in the user object
-    res.render("urls_register", templateVars);
+    res.render("login", templateVars);
     console.log("No user => register page") //DELETE
   }
 });
@@ -83,7 +97,7 @@ app.post("/login", (req, res) => {
   // Extract the email and password from the request body
   const { email, password } = req.body;
   // Check if the user exists in the user database
-  const user = findEmail(email, users);
+  const user = getUserByEmail(email, users);
   // Check if the provided password matches the password associated with the email
   if (user && bcrypt.compareSync(password, user.password)) {
     // Set the userID cookie and redirect to the urls page
@@ -104,11 +118,8 @@ app.post("/logout", (req, res) => {
 
 // REGISTER get/post // 
 app.get("/register", (req, res) => {
-  // Render the urls_register template with the user data
-  let templateVars = { 
-    user: users[req.session["userID"]]
-  };
-  res.render("urls_register", templateVars);
+  const templateVars = { user: null };
+  res.render("register", templateVars);
 });
 
 app.post("/register", (req, res) => {
@@ -139,7 +150,7 @@ app.post("/register", (req, res) => {
     // If email and/or password are missing, send a 400 Bad Request response
     res.status(400).send("Please enter email and password");
   }
-  console.log(users);
+  req.session.userId = newUserID;
   res.redirect("/urls");
 });
 
@@ -190,33 +201,36 @@ app.get("/urls/new", (req, res) => {
 });
 
 // Redirect to long URL associated with a short URL
+
+app.get("/urls/:id", (req, res) => {
+  const shortURL = req.params.id;
+  console.log('shortURL', shortURL)
+  const urlObject = urlDatabase[shortURL];
+
+  if (!urlObject) {
+    res.status(404).send("url not found");
+    return;
+  }
+  
+  const longURL = urlObject.longURL;
+  const userID = req.session.userID;
+
+ 
+  const templateVars = {
+    id: shortURL,
+    longURL:longURL,
+    user: userID,
+    urlObject: urlObject,
+  };
+  res.render("urls_show", templateVars);
+});
+
 app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id];
   res.redirect(longURL);
   console.log(longURL);
 });
 
-
-
-app.get("/urls/:id", (req, res) => {
-  if (!req.session["userID"]) {
-    console.log('users', users)
-    res.status(400).send("400 error ! Please Login or Register");
-  } else if (!urlDatabase[req.params.shortURL]) {
-    res.status(404).send("404 not found! This URL doesn't exist");
-  } else if (urlDatabase[req.params.shortURL].userID === req.session["userID"]) {
-    const templateVars = {
-      shortURL: req.params.shortURL,
-      longURL: urlDatabase[req.params.shortURL].longURL,
-      user: users[req.session["userID"]]
-    };
-    res.render("urls_show", templateVars);
-  } else if (urlDatabase[req.params.shortURL].userID !== req.session["userID"]) {
-    res.status(403).send("403 error ! This is not your URL");
-  } else {
-    res.status(400).send("400 error ! Please Login");
-  }
-});
 
 app.post("/urls/:id", (req, res) => {
   if (urlDatabase[req.params.id].userID === req.session["userID"]) {
