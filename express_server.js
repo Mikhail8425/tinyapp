@@ -204,7 +204,6 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:id", (req, res) => {
   const shortURL = req.params.id;
-  console.log('shortURL', shortURL)
   const urlObject = urlDatabase[shortURL];
 
   if (!urlObject) {
@@ -215,7 +214,11 @@ app.get("/urls/:id", (req, res) => {
   const longURL = urlObject.longURL;
   const userID = req.session.userID;
 
- 
+  // if (user_id !== urlObject.userID) {
+  //   res.status(403).send("Access to URL denied");
+  //   return;
+  // }
+  
   const templateVars = {
     id: shortURL,
     longURL:longURL,
@@ -223,12 +226,6 @@ app.get("/urls/:id", (req, res) => {
     urlObject: urlObject,
   };
   res.render("urls_show", templateVars);
-});
-
-app.get("/u/:id", (req, res) => {
-  const longURL = urlDatabase[req.params.id];
-  res.redirect(longURL);
-  console.log(longURL);
 });
 
 
@@ -250,7 +247,7 @@ app.post("/urls/:id/delete", (req, res) => {
   }
   const url = urlDatabase[req.params.id];
   if (!url) {
-    res.status(404).send("URL not found");
+    res.status(404).send("URL not found (app.post - urls-id-delete)");
     return;
   }
 
@@ -272,7 +269,7 @@ app.post("/urls/:id/edit", (req, res) => {
   const shortURL = req.params.id;
   // Check if shortURL exists in urlDatabase
   if (!urlDatabase[shortURL]) {
-    res.status(404).send("URL not found");
+    res.status(404).send("URL not found (app.post - urls-id-edit)");
     return;
   }
   urlDatabase[shortURL].longURL = longURL;
