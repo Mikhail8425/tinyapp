@@ -39,8 +39,8 @@ const {
   generateRandomString,
   getUserByEmail,
   getUserFromCookie,
-  getUserById,
-  getUrlFromShortUrl,
+  createUserUrlDataBase,
+  checkURL,
   generateNewShortUrl,
   createNewURL
 } = require("./helpers");
@@ -151,7 +151,6 @@ app.post("/register", (req, res) => {
     res.status(400).send("Please enter email and password");
   }
   req.session.userId = newUserID;
-  res.redirect("/urls");
 });
 
 //  URLS get/post  //
@@ -162,17 +161,10 @@ app.get("/urls", (req, res) => {
     res.status(401).send("You're not logged in. Please go to login page.");
   } else {
     // Filter urlDatabase to only show URLs created by the current user
-    const userUrls = {};
-    for (const [id, urlObj] of Object.entries(urlDatabase)) {
-      if (urlObj.userID === userID) {
-        userUrls[id] = urlObj.longURL;
-      }
-    }
-    // Render URLs index page with user-specific URL data
-    const templateVars = {
-      user: users[userID],
-      urls: userUrls,
-    };
+    const user = users[userID];
+    const urls = createUserUrlDataBase(userID, urlDatabase);
+    const shortURL = req.params.id;
+    const templateVars = { urls, shortURL, user };
     res.render("urls_index", templateVars);
   }
 });
@@ -203,31 +195,32 @@ app.get("/urls/new", (req, res) => {
 // Redirect to long URL associated with a short URL
 
 app.get("/urls/:id", (req, res) => {
+  const id= req.session.userID;
+  const user = users[id];
   const shortURL = req.params.id;
-  const urlObject = urlDatabase[shortURL];
 
-  if (!urlObject) {
-    res.status(404).send("url not found");
-    return;
-  }
-  
-  const longURL = urlObject.longURL;
-  const userID = req.session.userID;
 
-  // if (user_id !== urlObject.userID) {
-  //   res.status(403).send("Access to URL denied");
-  //   return;
-  // }
-  
-  const templateVars = {
-    id: shortURL,
-    longURL:longURL,
-    user: userID,
-    urlObject: urlObject,
+  if (!user) {
+    return res.status(403).send("<p> Cannot view unowned Urls <p>");
   };
-  res.render("urls_show", templateVars);
-});
 
+  const URLID = req.params.id;
+  const check = checkURL(URLID, urlDatabase);
+
+  if (!check) {
+    return res.status(404).send("<p>404 That URL Des Not exist");
+  };
+
+  if (id !== urlDatabase[shortURL].userID) {
+    return res.status(403).send("<p> Cannot Acces Unowned Urls <p>");
+  };
+
+  const longURL = urlDatabase[shortURL].longURL;
+  const templateVars = { shortURL, longURL, user, URLID, check };
+
+  res.render("urls_show", templateVars);
+  
+});
 
 app.post("/urls/:id", (req, res) => {
   if (urlDatabase[req.params.id].userID === req.session["userID"]) {

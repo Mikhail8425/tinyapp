@@ -15,10 +15,6 @@ const getUserByEmail = (email, db) => {
   return undefined;
 };
 
-const getUserById = function(id, database) {
-  return database[id];
-};
-
 const getUserFromCookie = function(sessionCookie) {
   const userIdFromCookie = sessionCookie.user_id;
   return getUserById(userIdFromCookie, users);
@@ -26,9 +22,19 @@ const getUserFromCookie = function(sessionCookie) {
 
 
 // URL FUNCTIONS //
-const getUrlFromShortUrl = function(shortUrl) {
-  return urlDatabase[shortUrl];
+const createUserUrlDataBase = function (userID, urlDatabase) {
+  const userUrlDataBase = {};
+  for (let shortURL in urlDatabase) {
+    if (urlDatabase[shortURL].userID === userID) {
+      userUrlDataBase[shortURL] = urlDatabase[shortURL];
+    }
+  }
+  return userUrlDataBase;
 };
+
+const checkURL = function(URLID, urlDatabase) {
+  return URLID in urlDatabase;
+}
 
 const updateUrlWithShortUrl = function(shortUrl, urlInfo) {
   urlDatabase[shortUrl] = {longURL: urlInfo.longURL,
@@ -54,8 +60,8 @@ module.exports = {
   generateRandomString,
   getUserByEmail,
   getUserFromCookie,
-  getUserById,
-  getUrlFromShortUrl,
+  createUserUrlDataBase,
+  checkURL,
   generateNewShortUrl,
   createNewURL
  }
