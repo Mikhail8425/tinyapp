@@ -253,20 +253,15 @@ app.post("/urls/:id/delete", (req, res) => {
 });
 
 app.post("/urls/:id/edit", (req, res) => {
-  const userId = req.session.userId;
-  if (!userId) {
-    res.send("Please login to shorten URLs");
-    return;
-  }
-  const longURL = req.body.newLongURL;
+  const id = req.session.userID;
   const shortURL = req.params.id;
-  // Check if shortURL exists in urlDatabase
-  if (!urlDatabase[shortURL]) {
-    res.status(404).send("URL not found (app.post - urls-id-edit)");
-    return;
+  if (!id) {
+    console.log("Cannot edit unowned IDs");
+    res.status(403);
+    return res.send("<p>Cannot edit unowned ids<p>");
   }
-  urlDatabase[shortURL].longURL = longURL;
-  res.redirect("/urls");
+  res.status(302);
+  return res.redirect(`/urls/${shortURL}`);
 });
 
 // Start listening on the specified port
