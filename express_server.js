@@ -38,11 +38,8 @@ app.use(express.static("public"));
 const { 
   generateRandomString,
   getUserByEmail,
-  getUserFromCookie,
   createUserUrlDataBase,
-  checkURL,
-  generateNewShortUrl,
-  createNewURL
+  checkURL
 } = require("./helpers");
 
 //body parser
@@ -222,14 +219,11 @@ app.get("/urls/:id", (req, res) => {
   
 });
 
-app.post("/urls/:id", (req, res) => {
-  if (urlDatabase[req.params.id].userID === req.session["userID"]) {
-    let longURL = req.body.longURL;
-    urlDatabase[req.params.id].longURL = longURL;
-    res.redirect('/urls');
-  } else {
-    res.status(403).send("Not permitted");
-  }
+// redirect to the original long url
+app.get("/u/:id", (req, res) => {
+  const id = req.session.userID;
+  const longURL = urlDatabase[req.params.id].longURL;
+  return res.redirect(longURL);
 });
 
 app.post("/urls/:id/delete", (req, res) => {
@@ -261,7 +255,20 @@ app.post("/urls/:id/edit", (req, res) => {
     return res.send("<p>Cannot edit unowned ids<p>");
   }
   res.status(302);
-  return res.redirect(`/urls/${shortURL}`);
+  res.redirect('/urls');
+  // return res.redirect(`/urls/${shortURL}`);
+});
+
+app.post("/urls/edit/:shortURL", (req, res) => {
+  const id = req.session.userID;
+  const newURL = req.body.newURL;
+  const urlid = req.params.shortURL;
+  urlDatabase[urlid] = {
+    longURL: newURL,
+    userID: id,
+  };
+  res.status(302);
+  return res.redirect("/urls");
 });
 
 // Start listening on the specified port

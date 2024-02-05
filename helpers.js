@@ -15,12 +15,6 @@ const getUserByEmail = (email, db) => {
   return undefined;
 };
 
-const getUserFromCookie = function(sessionCookie) {
-  const userIdFromCookie = sessionCookie.user_id;
-  return getUserById(userIdFromCookie, users);
-};
-
-
 // URL FUNCTIONS //
 const createUserUrlDataBase = function (userID, urlDatabase) {
   const userUrlDataBase = {};
@@ -36,32 +30,9 @@ const checkURL = function(URLID, urlDatabase) {
   return URLID in urlDatabase;
 }
 
-const updateUrlWithShortUrl = function(shortUrl, urlInfo) {
-  urlDatabase[shortUrl] = {longURL: urlInfo.longURL,
-    userID: urlInfo.userID};
-};
-
-const createNewURL = function(longURL, userID) {
-  let newShortUrl = generateNewShortUrl();
-  updateUrlWithShortUrl(newShortUrl, {longURL: longURL, userID: userID});
-  return newShortUrl;
-};
-
-const generateNewShortUrl = function() {
-  let newShortUrl = generateRandomString();
-  while (urlDatabase[newShortUrl] !== undefined) {
-    newShortUrl = generateRandomString();
-  }
-  return newShortUrl;
-};
-
-
 module.exports = { 
   generateRandomString,
   getUserByEmail,
-  getUserFromCookie,
   createUserUrlDataBase,
-  checkURL,
-  generateNewShortUrl,
-  createNewURL
+  checkURL
  }
